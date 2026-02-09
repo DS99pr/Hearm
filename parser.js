@@ -32,7 +32,7 @@ function parser(tokens) {
         }
 
         if (cursor() && cursor().type == "IDENTIFIER" && !is_in(functions, cursor().value)) {
-            helpers.betray("Theres no such command like that twin");
+            helpers.betray("Theres no such command like that");
             break;
         }
 
