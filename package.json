@@ -1,6 +1,6 @@
 {
   "name": "hearm",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Programming language that uses Old English",
   "main": "index.js",
   "type": "module",
