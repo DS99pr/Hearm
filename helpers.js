@@ -8,7 +8,15 @@ function add(f, s) {
     return f += s
 }
 
+function betray(message) {
+    console.log(`
+// BETRAYAL //
+${message}
+`.trim())
+}
+
 export default {
     welcome,
-    add
+    add,
+    betray
 }

@@ -3,6 +3,7 @@
 //
 
 // IMPORTS
+import parser from './parser.js'
 import readline from 'readline'
 import helpers from './helpers.js'
 
@@ -21,9 +22,16 @@ function lexer(input) {
     let tokens = [];
     let nc = ""; // number cache
     let kc = ""; // identifier cache (originally: keyword cache)
+    let sc = ""; // string cache
 
     function cursor() {
         return input[i]
+    }
+
+    function check(char, type, value) {
+        if (cursor() == char) {
+            tokens.push({type: type, value: value})
+        }
     }
 
     while (i < input.length) {
@@ -34,7 +42,7 @@ function lexer(input) {
         }
 
         if (kc.length > 0 && !/[a-zA-Z]/.test(cursor())) {
-            tokens.push({type: "IDENTIFIER", value: kc});
+            tokens.push({type: "IDENTIFIER", value: kc.toLowerCase()});
             kc = ""; 
         }
 
@@ -42,9 +50,22 @@ function lexer(input) {
             nc = helpers.add(nc, cursor())
         }
 
+        if (cursor() == `"`) {
+            i++
+            while (cursor() != `"`) {
+                sc = helpers.add(sc, cursor())
+                i++
+            } // FIXME: infinite loop
+            tokens.push({type: "STRING", value: sc})
+        };
+
         if (/[a-zA-Z]/.test(cursor())) {
             kc = helpers.add(kc, cursor())
         }
+
+        check("[", "L_PARENTH", "[")
+        check("]", "R_PARENTH", "]")
+        check(";", "END", ";")
 
         if (/\s/.test(cursor())) {
             i++;
@@ -59,12 +80,13 @@ function lexer(input) {
     }
 
     if (kc.length > 0) {
-        tokens.push({type: "IDENTIFIER", value: kc});
+        tokens.push({type: "IDENTIFIER", value: kc.toLowerCase()});
         kc = "";
     }
 
     console.log(tokens)
-};
+    return tokens
+}
 
 // 
 // REPL
@@ -73,7 +95,8 @@ function lexer(input) {
 helpers.welcome();
 function repl() {
     rli.question('>> ', (input) => {
-        lexer(input);
+        const tokens = lexer(input);
+        parser.parser(tokens)
         repl()
     });
 };
