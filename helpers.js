@@ -5,7 +5,7 @@ Wes hal on Hearm spraece. Thes waes getimbrod on thaem geare 2026.
 }
 
 function add(f, s) {
-    return `${f}${s}`
+    return f += s
 }
 
 export default {
