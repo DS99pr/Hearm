@@ -3,9 +3,11 @@
 //
 
 // IMPORTS
-import parser from './parser.js'
 import readline from 'readline'
 import helpers from './helpers.js'
+import parser from './parser.js'
+import interpreter from './interpreter.js'
+import consts from './consts.js'
 
 // INTERFACE
 const rli = readline.createInterface({
@@ -18,6 +20,7 @@ const rli = readline.createInterface({
 //
 
 function lexer(input) {
+    // i need to rewrite ts
     let i = 0;
     let tokens = [];
     let nc = ""; // number cache
@@ -37,12 +40,12 @@ function lexer(input) {
     while (i < input.length) {
 
         if (nc.length > 0 && !/[0-9]/.test(cursor())) {
-            tokens.push({type: "NUMBER", value: Number(nc)});
+            tokens.push({type: consts.NUMBER_TYPE, value: Number(nc)});
             nc = "";
         }
 
         if (kc.length > 0 && !/[a-zA-Z]/.test(cursor())) {
-            tokens.push({type: "IDENTIFIER", value: kc.toLowerCase()});
+            tokens.push({type: consts.IDENTIFIER_TYPE, value: kc.toLowerCase()});
             kc = ""; 
         }
 
@@ -56,16 +59,16 @@ function lexer(input) {
                 sc = helpers.add(sc, cursor())
                 i++
             } // FIXME: infinite loop
-            tokens.push({type: "STRING", value: sc})
+            tokens.push({type: consts.STRING_TYPE, value: sc})
         };
 
         if (/[a-zA-Z]/.test(cursor())) {
             kc = helpers.add(kc, cursor())
         }
 
-        check("[", "L_PARENTH", "[")
-        check("]", "R_PARENTH", "]")
-        check(";", "END", ";")
+        check("[", consts.LEFT_PARENTHESIS, "[")
+        check("]", consts.RIGHT_PARENTHESIS, "]")
+        check(";", consts.SEMICOLON, ";")
 
         if (/\s/.test(cursor())) {
             i++;
@@ -75,12 +78,12 @@ function lexer(input) {
     }
 
     if (nc.length > 0) {
-        tokens.push({type: "NUMBER", value: Number(nc)});
+        tokens.push({type: consts.NUMBER_TYPE, value: Number(nc)});
         nc = "";
     }
 
     if (kc.length > 0) {
-        tokens.push({type: "IDENTIFIER", value: kc.toLowerCase()});
+        tokens.push({type: consts.IDENTIFIER_TYPE, value: kc.toLowerCase()});
         kc = "";
     }
 
@@ -96,7 +99,8 @@ helpers.welcome();
 function repl() {
     rli.question('>> ', (input) => {
         const tokens = lexer(input);
-        parser.parser(tokens)
+        const asts = parser.parser(tokens)
+        interpreter.interpreter(asts)
         repl()
     });
 };
